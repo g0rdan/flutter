@@ -1600,7 +1600,11 @@ class _TextFieldState extends State<TextField>
                 ? _errorColor
                 : widget.cursorColor ?? selectionStyle.cursorColor ?? cupertinoTheme.primaryColor;
         selectionColor =
-            selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40);
+            focusNode.hasFocus
+                ? (selectionStyle.selectionColor ?? cupertinoTheme.primaryColor.withOpacity(0.40))
+                // if not focused, use the tertiary label color
+                // to match the macOS text field style.
+                : CupertinoDynamicColor.resolve(CupertinoColors.tertiaryLabel, context);
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.devicePixelRatioOf(context), 0);
         handleDidGainAccessibilityFocus = () {
@@ -1698,8 +1702,7 @@ class _TextFieldState extends State<TextField>
           maxLines: widget.maxLines,
           minLines: widget.minLines,
           expands: widget.expands,
-          // Only show the selection highlight when the text field is focused.
-          selectionColor: focusNode.hasFocus ? selectionColor : null,
+          selectionColor: selectionColor,
           selectionControls: widget.selectionEnabled ? textSelectionControls : null,
           onChanged: widget.onChanged,
           onSelectionChanged: _handleSelectionChanged,
