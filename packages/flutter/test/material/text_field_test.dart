@@ -6347,7 +6347,9 @@ void main() {
     expect(feedback.hapticCount, 1);
   });
 
-  testWidgets('Text field drops selection color when losing focus', (WidgetTester tester) async {
+  testWidgets('Text field changes selection color to a system color when losing focus (macOS)', (
+    WidgetTester tester,
+  ) async {
     // Regression test for https://github.com/flutter/flutter/issues/103341.
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
@@ -6387,20 +6389,38 @@ void main() {
     await tester.pump();
 
     // Focus and selection is active on first TextField, so the second TextFields
-    // selectionColor should be dropped.
+    // selectionColor switches to a system color.
     await tester.tap(find.byKey(key1));
     controller1.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
     await tester.pump();
-    expect(controller1.selection, selection);
-    expect(state1.widget.selectionColor, selectionColor);
-    expect(state2.widget.selectionColor, null);
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.macOS:
+        expect(controller1.selection, selection);
+        expect(state1.widget.selectionColor, selectionColor);
+        expect(state2.widget.selectionColor, isA<CupertinoDynamicColor>());
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+    }
 
     // Focus and selection is active on second TextField, so the first TextFields
-    // selectionColor should be dropped.
+    // selectionColor switches to a system color.
     await tester.tap(find.byKey(key2));
     await tester.pump();
-    expect(state1.widget.selectionColor, null);
-    expect(state2.widget.selectionColor, selectionColor);
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.macOS:
+        expect(state1.widget.selectionColor, isA<CupertinoDynamicColor>());
+        expect(state2.widget.selectionColor, selectionColor);
+      case TargetPlatform.iOS:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+    }
   });
 
   testWidgets('Selection is consistent with text length', (WidgetTester tester) async {
