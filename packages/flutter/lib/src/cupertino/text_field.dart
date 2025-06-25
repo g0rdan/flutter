@@ -1536,11 +1536,13 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
     );
 
     final Color selectionColor =
-        CupertinoDynamicColor.maybeResolve(
-          DefaultSelectionStyle.of(context).selectionColor,
-          context,
-        ) ??
-        CupertinoTheme.of(context).primaryColor.withOpacity(0.2);
+        _effectiveFocusNode.hasFocus
+            ? (CupertinoDynamicColor.maybeResolve(
+                  DefaultSelectionStyle.of(context).selectionColor,
+                  context,
+                ) ??
+                CupertinoTheme.of(context).primaryColor.withOpacity(0.2))
+            : CupertinoDynamicColor.resolve(CupertinoColors.tertiaryLabel, context);
 
     // Set configuration as disabled if not otherwise specified. If specified,
     // ensure that configuration uses Cupertino text style for misspelled words
@@ -1581,8 +1583,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
             expands: widget.expands,
             magnifierConfiguration:
                 widget.magnifierConfiguration ?? CupertinoTextField._iosMagnifierConfiguration,
-            // Only show the selection highlight when the text field is focused.
-            selectionColor: _effectiveFocusNode.hasFocus ? selectionColor : null,
+            selectionColor: selectionColor,
             selectionControls: widget.selectionEnabled ? textSelectionControls : null,
             groupId: widget.groupId,
             onChanged: widget.onChanged,
